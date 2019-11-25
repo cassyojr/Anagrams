@@ -11,6 +11,8 @@ namespace Anagram.Controllers
 {
     public class HomeController : Controller
     {
+        private List<string> Anagrams = new List<string>();
+
         [BindProperty]
         public AnagramViewModel AnagramViewModel { get; set; }
 
@@ -33,36 +35,82 @@ namespace Anagram.Controllers
             if (string.IsNullOrEmpty(search)) return RedirectToAction("Error", new { errorTitle = "Invalid input", errorMessage = "Cannot find anagrams with empty strings" });
             if (CheckForInvalidInputs(search)) return RedirectToAction("Error", new { errorTitle = "Invalid input", errorMessage = "Input only accepts letters and white spaces" });
 
-            var words = System.IO.File.ReadAllLines(@"Infrastructure\words.txt");
-            var anagramsGlobalList = new List<Anagrams>();
+            var words = System.IO.File.ReadAllLines(@"Infrastructure\words2.txt");
 
-            await Task.Run(() =>
-             {
-                 var anagrams = new Anagrams();
-                 var currentWords = words;
-                 var currentSearchWord = search;
+            var filteredWordsList = FilterWords(search, words);
+            FindAnagrams(search, words.ToList());
 
-                 foreach (var word in words)
-                 {
-                     if (string.IsNullOrEmpty(currentSearchWord)) break;
+            foreach (var anagram in Anagrams.Distinct())
+                Console.WriteLine(anagram);
 
-                     var currentWordLetters = word.ToCharArray();
-                     var currentSearchContainsWord = currentWordLetters.All(letter => currentSearchWord.Contains(letter));
-
-                     if (currentSearchContainsWord)
-                     {
-                         foreach (var letter in currentWordLetters)
-                         {
-                             var regex = new Regex(Regex.Escape(letter.ToString()));
-                             currentSearchWord = regex.Replace(currentSearchWord, "", 1);
-                         }
-
-                         anagrams.AnagramsList.Add(word);
-                     }
-                 }
-             });
+            await Task.Run(() => { });
 
             return Ok();
+        }
+
+        private void FindAnagrams(string term, List<string> words)
+        {
+            // var convertedTerm = term.ToCharArray();
+            // Array.Sort(convertedTerm);
+            // var sortedTerm = new string(convertedTerm);
+
+            for (var i = 0; i <= words.Count - 1; i++)
+            {
+                var line = string.Empty;
+                Recursive(line, term, words);
+            }
+        }
+
+        private void Recursive(string line, string term, List<string> words)
+        {
+            for (var i = 0; i <= words.Count - 1; i++)
+            {
+                if (Anagrams.Any(x => x == words[i])) continue;
+
+                var currentWordLetters = words[i].Trim().ToCharArray();
+                var currentSearchContainsWord = currentWordLetters.All(letter => term.Contains(letter));
+
+                if (currentSearchContainsWord)
+                {
+                    var newLine = line + " " + words[i];
+
+                    if (Anagrams.Any(x => x == newLine)) continue;
+
+                    line = newLine;
+
+                    foreach (var letter in currentWordLetters)
+                    {
+                        var regex = new Regex(Regex.Escape(letter.ToString()));
+                        term = regex.Replace(term, "", 1);
+                    }
+                }
+
+                if (string.IsNullOrEmpty(term))
+                {
+                    Anagrams.Add(line);
+                    return;
+                }
+            }
+
+            // if (!string.IsNullOrEmpty(term))
+            // {
+            // var newWords = words.Where(x => !Anagrams.Any(y => y == x)).ToList();
+            //     Recursive(term, words);
+            // };
+        }
+
+        private IList<string> FilterWords(string term, IEnumerable<string> words)
+        {
+            var wordsList = new List<string>();
+
+            foreach (var word in words)
+            {
+                var currentWordLetters = word.ToCharArray();
+                var currentTermContainsWord = currentWordLetters.All(letter => term.Contains(letter));
+                if (currentTermContainsWord && term != word) wordsList.Add(word);
+            }
+
+            return wordsList;
         }
 
         private bool CheckForInvalidInputs(string input)
