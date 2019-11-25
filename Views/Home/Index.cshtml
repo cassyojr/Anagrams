@@ -1,0 +1,13 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome to the Anagram Finder</h1>
+    <form asp-controller="Home" asp-action="Search" method="get">
+       <p>
+        Type something: <input maxlength="16" type="text" class="uppercase" name="search">
+        <input type="submit" value="Search Anagrams" />
+       </p>
+    </form>
+</div>
