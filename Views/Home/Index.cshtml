@@ -1,13 +1,38 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
+@model AnagramViewModel
 
 <div class="text-center">
     <h1 class="display-4">Welcome to the Anagram Finder</h1>
+    <br/>
     <form asp-controller="Home" asp-action="Search" method="get">
        <p>
         Type something: <input maxlength="16" type="text" class="uppercase" name="search">
         <input type="submit" value="Search Anagrams" />
        </p>
     </form>
+<br/>
+@if(Model != null)
+{
+    @if(Model.Anagrams.Any())
+    {
+        <p>Anagrams for @Model.Search: </p>
+        <ul>   
+            @foreach (var item in Model.Anagrams)
+            {
+                <li>
+                    @item
+                </li>
+            }
+        </ul>
+    } else
+    {
+         <p>Nothing found for @Model.Search</p>
+    }
+
+    <p>
+        Request time: @Model.RequestTime
+    </p>
+}
 </div>
