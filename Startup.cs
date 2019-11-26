@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Anagrams.Interfaces;
+using Anagrams.Service;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -24,6 +26,7 @@ namespace Anagram
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRazorPages();
+            services.AddScoped<IAnagramService, AnagramService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
